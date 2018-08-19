@@ -143,7 +143,7 @@ class ViewController: UIViewController {
         }
         let personText = "Person number \(index + 1) \(isSmiling), with \(eyesOpened)."
         let elapsed = Date().timeIntervalSince(startTimeStamp)
-        _ = "Test took: \(elapsed) \(personText)"
+//        _ = "Test took: \(elapsed) \(personText)"
         return "\(index+1) \(elapsed)"
     }
     
@@ -206,7 +206,7 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
             imageArray.images.map {
                 value in
                 DispatchQueue.main.async(execute: { () -> Void in
-                    self.faceDetection(fromImage: value)
+                    return self.faceDetection(fromImage: value)
                 })
             }
         }
