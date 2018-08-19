@@ -165,6 +165,22 @@ func faceDetectionOptions() -> VisionFaceDetectorOptions {
     options.classificationType = .all
     options.minFaceSize = CGFloat(0.1)
     options.isTrackingEnabled = false
+    
+    
+    // fast 4 variations
+    // none none 0.1
+    // none none 0.2
+    // all none 0.1
+    // all all 0.1
+    // none all 0.1
+    
+    // accurate 4 variations
+    // none none 0.1
+    // none none 0.2
+    // all none 0.1
+    // all all 0.1
+    // none all 0.1
+    
     return options
 }
 
