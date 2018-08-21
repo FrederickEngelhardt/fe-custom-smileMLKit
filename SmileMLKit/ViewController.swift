@@ -14,6 +14,7 @@ struct imageArray {
     static var images: [UIImage] = []
     static var active: Bool = false
     static var multiplier: Int = 1
+    static var text: String = ""
 }
 class RunQueue {
     
@@ -50,7 +51,7 @@ class ViewController: UIViewController {
     lazy var faceDetector = Vision.vision().faceDetector(options: faceDetectionOptions())
     lazy var vision = Vision.vision()
     var labelDetector: VisionLabelDetector!
-    static let labelConfidenceThreshold : Float = 0.4
+    static let labelConfidenceThreshold : Float = 0.9
     let options = VisionLabelDetectorOptions(
         confidenceThreshold: labelConfidenceThreshold
     )
@@ -130,20 +131,23 @@ class ViewController: UIViewController {
                 print("completed image!")
             }
     }
-    func detect(image: VisionImage) {
-        labelDetector.detect(in: image) { (labels, error) in
+    func detect(fromImage image: UIImage) {
+        let v = VisionImage(image: image)
+        labelDetector.detect(in: v) { (labels, error) in
             //            self.runQueue.pop()
             guard error == nil, let labels = labels, !labels.isEmpty else {
                 // Error.
                 self.detectedInfo.text = "No idea"
                 return
             }
-            self.detectedInfo.text = labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
+            imageArray.text += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
+            self.detectedInfo.text = imageArray.text
         }
     }
-//    func processImage(fromImage image: UIImage) {
-//        self.detect(fromImage: image)
-//    }
+    func processImage(fromImage image: UIImage) {
+        self.detect(fromImage: image)
+        self.faceDetection(fromImage: image)
+    }
 
     
     private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {
@@ -184,7 +188,8 @@ class ViewController: UIViewController {
             text = text + next + " "
         }
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
-        detectedInfo.text = elapsed
+        imageArray.text += elapsed
+        self.detectedInfo.text = imageArray.text
     }
     
     private func personText(forState state: FaceState, index: Int) -> String {
@@ -263,8 +268,8 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
                 value in
 //                self.faceDetection(fromImage: value)
 //                self.processImage(fromImage: value)
-                let v = VisionImage(image: value)
-                self.detect(image: v)
+                
+                self.processImage(fromImage: value)
             }
         }
     }
