@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import Dispatch
 
 struct imageArray {
     static var images: [UIImage] = []
@@ -205,9 +206,46 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         if (imageArray.active == true) {
             imageArray.images.map {
                 value in
-                DispatchQueue.main.async(execute: { () -> Void in
-                    return self.faceDetection(fromImage: value)
-                })
+//                DispatchQueue.main.async(execute: { () -> Void in
+//                    return self.faceDetection(fromImage: value)
+//                })
+//                let core1 = DispatchQueue.global(qos: .userInitiated)
+//                let core2 = DispatchQueue.global(qos: .userInitiated)
+//                let dw = DispatchWorkItem {
+//                    self.faceDetection(fromImage: value)
+//                }
+//                core1.async(execute: dw)
+//                core2.async(execute: dw)
+                let core1 = DispatchQueue(label: "core1", qos: .userInitiated)
+                let core2 = DispatchQueue(label: "core2", qos: .userInitiated)
+//                let dw = DispatchWorkItem {
+//                    self.faceDetection(fromImage: value)
+//                }
+                core1.async {
+                    self.faceDetection(fromImage: value)
+                }
+                core1.async {
+                    self.faceDetection(fromImage: value)
+                }
+                core2.async{
+                    self.faceDetection(fromImage: value)
+                }
+//                queue1.sync {
+//
+//                    Thread.current.name = "Queue1"
+//                    self.faceDetection(fromImage: value)
+//                    print("called queue1")
+//
+//                }
+//                queue2.sync {
+//                    Thread.current.name = "Queue2"
+//                    print("called queue2")
+//                    self.faceDetection(fromImage: value)
+//                }
+//                DispatchQueue.global(qos: .background).async {
+//                    Thread.current.name = "my thread"
+//                    self.faceDetection(fromImage: value)
+//                }
             }
         }
     }
