@@ -81,10 +81,7 @@ class ViewController: UIViewController {
     private func faceDetection(fromImage image: UIImage) {
         startTimeStamp = Date()
         let visionImage = VisionImage(image: image)
-        let q = DispatchQueue(label: "ConcurrentQueue", qos: .userInitiated, attributes: .concurrent)
-        let q2 = DispatchQueue(label: "ConcurrentQueue", qos: .userInitiated, attributes: .concurrent)
-            q.async {
-            Vision.vision().faceDetector(options: faceDetectionOptions()).detect(in: visionImage) { [unowned self] (faces, error) in
+        Vision.vision().faceDetector(options: faceDetectionOptions()).detect(in: visionImage) { [unowned self] (faces, error) in
                 guard error == nil, let detectedFaces = faces else {
                     self.showAlert("An error occured", alertMessage: "The face detection failed.")
                     return
@@ -92,21 +89,8 @@ class ViewController: UIViewController {
                 
                 let faceStates = self.faceStates(forDetectedFaces: detectedFaces)
                 self.updateDetectedInfo(forFaceStates: faceStates)
-                print("Queue 1")
+                print("completed image!")
             }
-        }
-        q2.async {
-            self.faceDetector.detect(in: visionImage) { [unowned self] (faces, error) in
-                guard error == nil, let detectedFaces = faces else {
-                    self.showAlert("An error occured", alertMessage: "The face detection failed.")
-                    return
-                }
-                
-                let faceStates = self.faceStates(forDetectedFaces: detectedFaces)
-                self.updateDetectedInfo(forFaceStates: faceStates)
-                print("Queue2")
-            }
-        }
     }
 //    private func faceDetectionAsync(image: UIImage, completion: @escaping (Error?) -> Void) {
 //        self.faceDetection(fromImage: image)
@@ -224,61 +208,12 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
             imageArray.images.append(image)
             i += 1
         }
+
         // Loops through the array and does detection on each photo
         if (imageArray.active == true) {
             imageArray.images.map {
                 value in
-//                DispatchQueue.main.async(execute: { () -> Void in
-//                    return self.faceDetection(fromImage: value)
-//                })
-//                let core1 = DispatchQueue.global(qos: .userInitiated)
-//                let core2 = DispatchQueue.global(qos: .userInitiated)
-//                let dw = DispatchWorkItem {
-//                    self.faceDetection(fromImage: value)
-//                }
-//                core1.async(execute: dw)
-//                core2.async(execute: dw)
-//                let dw = DispatchWorkItem {
-//                    self.faceDetection(fromImage: value)
-//                }
-//                core1.async {
-//
-//                    self.faceDetection(fromImage: value, completion: { (error) in
-//                        if let error = error {
-//                            print("Oops something failed!")
-//                        }
-//                        else {
-//                            print("It has finished! Core1")
-//                        }
-//                    })
-//                }
-//                core2.async{
-//                    self.faceDetection(fromImage: value, completion: { (error) in
-//                        if let error = error {
-//                            print("Oops something failed!")
-//                        }
-//                        else {
-//                            print("It has finished! Core2")
-//                        }
-//                    })
-//                }
                 self.faceDetection(fromImage: value)
-//                queue1.sync {
-//
-//                    Thread.current.name = "Queue1"
-//                    self.faceDetection(fromImage: value)
-//                    print("called queue1")
-//
-//                }
-//                queue2.sync {
-//                    Thread.current.name = "Queue2"
-//                    print("called queue2")
-//                    self.faceDetection(fromImage: value)
-//                }
-//                DispatchQueue.global(qos: .background).async {
-//                    Thread.current.name = "my thread"
-//                    self.faceDetection(fromImage: value)
-//                }
             }
         }
     }
