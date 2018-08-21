@@ -15,9 +15,46 @@ struct imageArray {
     static var active: Bool = false
     static var multiplier: Int = 1
 }
+class RunQueue {
+    
+    private var lock = NSLock()
+    var maxConcurrent: Int
+    var count = 0
+    
+    init(maxConcurrent: Int) {
+        self.maxConcurrent = maxConcurrent
+    }
+    
+    func pop() {
+        lock.lock()
+        if count > 0 {
+            count -= 1
+        }
+        lock.unlock()
+    }
+    
+    func push() -> Bool {
+        lock.lock()
+        if count < maxConcurrent {
+            count += 1
+            lock.unlock()
+            return true
+        }
+        lock.unlock()
+        return false
+    }
+    
+}
 class ViewController: UIViewController {
     let threshold: CGFloat = 0.75
     lazy var faceDetector = Vision.vision().faceDetector(options: faceDetectionOptions())
+    lazy var vision = Vision.vision()
+    var labelDetector: VisionLabelDetector!
+    static let labelConfidenceThreshold : Float = 0.4
+    let options = VisionLabelDetectorOptions(
+        confidenceThreshold: labelConfidenceThreshold
+    )
+
     var startTimeStamp = Date()
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var detectedInfo: UILabel!
@@ -25,6 +62,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        labelDetector = vision.labelDetector(options: options)
         // Do any additional setup after loading the view, typically from a nib.
     }
     
@@ -92,6 +130,20 @@ class ViewController: UIViewController {
                 print("completed image!")
             }
     }
+    func detect(image: VisionImage) {
+        labelDetector.detect(in: image) { (labels, error) in
+            //            self.runQueue.pop()
+            guard error == nil, let labels = labels, !labels.isEmpty else {
+                // Error.
+                self.detectedInfo.text = "No idea"
+                return
+            }
+            self.detectedInfo.text = labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
+        }
+    }
+//    func processImage(fromImage image: UIImage) {
+//        self.detect(fromImage: image)
+//    }
 
     
     private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {
@@ -209,7 +261,10 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         if (imageArray.active == true) {
             imageArray.images.map {
                 value in
-                self.faceDetection(fromImage: value)
+//                self.faceDetection(fromImage: value)
+//                self.processImage(fromImage: value)
+                let v = VisionImage(image: value)
+                self.detect(image: v)
             }
         }
     }

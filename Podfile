@@ -6,4 +6,6 @@ target 'SmileMLKit' do
   pod 'Firebase/Core'
   pod 'Firebase/MLVision'
   pod 'Firebase/MLVisionFaceModel'
+  pod 'Firebase/MLVisionLabelModel'
+  pod 'Firebase/MLModelInterpreter'
 end
