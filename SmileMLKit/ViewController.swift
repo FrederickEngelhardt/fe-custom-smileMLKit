@@ -17,7 +17,6 @@ struct imageArray {
 }
 class ViewController: UIViewController {
     let threshold: CGFloat = 0.75
-    
     lazy var faceDetector = Vision.vision().faceDetector(options: faceDetectionOptions())
     var startTimeStamp = Date()
     @IBOutlet weak var imageView: UIImageView!
@@ -82,16 +81,38 @@ class ViewController: UIViewController {
     private func faceDetection(fromImage image: UIImage) {
         startTimeStamp = Date()
         let visionImage = VisionImage(image: image)
-        faceDetector.detect(in: visionImage) { [unowned self] (faces, error) in
-            guard error == nil, let detectedFaces = faces else {
-                self.showAlert("An error occured", alertMessage: "The face detection failed.")
-                return
+        let q = DispatchQueue(label: "ConcurrentQueue", qos: .userInitiated, attributes: .concurrent)
+        let q2 = DispatchQueue(label: "ConcurrentQueue", qos: .userInitiated, attributes: .concurrent)
+            q.async {
+            Vision.vision().faceDetector(options: faceDetectionOptions()).detect(in: visionImage) { [unowned self] (faces, error) in
+                guard error == nil, let detectedFaces = faces else {
+                    self.showAlert("An error occured", alertMessage: "The face detection failed.")
+                    return
+                }
+                
+                let faceStates = self.faceStates(forDetectedFaces: detectedFaces)
+                self.updateDetectedInfo(forFaceStates: faceStates)
+                print("Queue 1")
             }
-            
-            let faceStates = self.faceStates(forDetectedFaces: detectedFaces)
-            self.updateDetectedInfo(forFaceStates: faceStates)
+        }
+        q2.async {
+            self.faceDetector.detect(in: visionImage) { [unowned self] (faces, error) in
+                guard error == nil, let detectedFaces = faces else {
+                    self.showAlert("An error occured", alertMessage: "The face detection failed.")
+                    return
+                }
+                
+                let faceStates = self.faceStates(forDetectedFaces: detectedFaces)
+                self.updateDetectedInfo(forFaceStates: faceStates)
+                print("Queue2")
+            }
         }
     }
+//    private func faceDetectionAsync(image: UIImage, completion: @escaping (Error?) -> Void) {
+//        self.faceDetection(fromImage: image)
+//        completion(nil)
+//        print("Completed!")
+//    }
     
     private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {
         var states = [FaceState]()
@@ -126,11 +147,12 @@ class ViewController: UIViewController {
     
     private func updateDetectedInfo(forFaceStates faceStates: [FaceState]) {
         var text = ""
-        for (index, faceState) in faceStates.enumerated() {
-            let next = personText(forState: faceState, index: index)
-            text = text + next + " "
-        }
-        detectedInfo.text = text
+//        for (index, faceState) in faceStates.enumerated() {
+//            let next = personText(forState: faceState, index: index)
+//            text = text + next + " "
+//        }
+        let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
+        detectedInfo.text = elapsed
     }
     
     private func personText(forState state: FaceState, index: Int) -> String {
@@ -216,20 +238,31 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 //                }
 //                core1.async(execute: dw)
 //                core2.async(execute: dw)
-                let core1 = DispatchQueue(label: "core1", qos: .userInitiated)
-                let core2 = DispatchQueue(label: "core2", qos: .userInitiated)
 //                let dw = DispatchWorkItem {
 //                    self.faceDetection(fromImage: value)
 //                }
-                core1.async {
-                    self.faceDetection(fromImage: value)
-                }
-                core1.async {
-                    self.faceDetection(fromImage: value)
-                }
-                core2.async{
-                    self.faceDetection(fromImage: value)
-                }
+//                core1.async {
+//
+//                    self.faceDetection(fromImage: value, completion: { (error) in
+//                        if let error = error {
+//                            print("Oops something failed!")
+//                        }
+//                        else {
+//                            print("It has finished! Core1")
+//                        }
+//                    })
+//                }
+//                core2.async{
+//                    self.faceDetection(fromImage: value, completion: { (error) in
+//                        if let error = error {
+//                            print("Oops something failed!")
+//                        }
+//                        else {
+//                            print("It has finished! Core2")
+//                        }
+//                    })
+//                }
+                self.faceDetection(fromImage: value)
 //                queue1.sync {
 //
 //                    Thread.current.name = "Queue1"
