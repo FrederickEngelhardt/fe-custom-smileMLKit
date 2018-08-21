@@ -81,7 +81,7 @@ class ViewController: UIViewController {
     private func faceDetection(fromImage image: UIImage) {
         startTimeStamp = Date()
         let visionImage = VisionImage(image: image)
-        Vision.vision().faceDetector(options: faceDetectionOptions()).detect(in: visionImage) { [unowned self] (faces, error) in
+        faceDetector.detect(in: visionImage) { [unowned self] (faces, error) in
                 guard error == nil, let detectedFaces = faces else {
                     self.showAlert("An error occured", alertMessage: "The face detection failed.")
                     return
@@ -92,11 +92,7 @@ class ViewController: UIViewController {
                 print("completed image!")
             }
     }
-//    private func faceDetectionAsync(image: UIImage, completion: @escaping (Error?) -> Void) {
-//        self.faceDetection(fromImage: image)
-//        completion(nil)
-//        print("Completed!")
-//    }
+
     
     private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {
         var states = [FaceState]()
@@ -131,10 +127,10 @@ class ViewController: UIViewController {
     
     private func updateDetectedInfo(forFaceStates faceStates: [FaceState]) {
         var text = ""
-//        for (index, faceState) in faceStates.enumerated() {
-//            let next = personText(forState: faceState, index: index)
-//            text = text + next + " "
-//        }
+        for (index, faceState) in faceStates.enumerated() {
+            let next = personText(forState: faceState, index: index)
+            text = text + next + " "
+        }
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
         detectedInfo.text = elapsed
     }
