@@ -194,7 +194,7 @@ class ViewController: UIViewController {
             text = text + next + " "
         }
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
-        imageArray.text = "\(elapsed) \(text)"
+        imageArray.text = "\(elapsed) \(text) THIS IS RESPONSe"
         self.detectedInfo.text = imageArray.text
     }
     
@@ -240,7 +240,7 @@ class ViewController: UIViewController {
                 let imageSize = CGSize(width: asset.pixelWidth,
                                        height: asset.pixelHeight)
                 let options = PHImageRequestOptions()
-                options.deliveryMode = .fastFormat
+                options.deliveryMode = .highQualityFormat
                 imageManager.requestImage(for: asset,
                                          targetSize: imageSize,
                                          contentMode: .aspectFill,
@@ -306,8 +306,8 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
             imageArray.images.map {
                 value in
 //                self.faceDetection(fromImage: value)
-//                self.processImage(fromImage: value)
-                self.grabPhotos()
+                self.processImage(fromImage: value)
+//                self.grabPhotos()
 //                self.processImage(fromImage: value)
             }
         }
