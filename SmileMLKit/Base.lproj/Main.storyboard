@@ -49,7 +49,7 @@
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="Eit-yo-Z59" secondAttribute="bottom" constant="30" id="B1t-z6-Fzs"/>
                                     <constraint firstAttribute="trailing" secondItem="SBV-BH-R5q" secondAttribute="trailing" constant="8" id="ERx-xI-AXa"/>
-                                    <constraint firstItem="Eit-yo-Z59" firstAttribute="top" secondItem="SBV-BH-R5q" secondAttribute="bottom" constant="16" id="Ms5-zb-a8d"/>
+                                    <constraint firstItem="Eit-yo-Z59" firstAttribute="top" secondItem="SBV-BH-R5q" secondAttribute="bottom" id="Ms5-zb-a8d"/>
                                     <constraint firstItem="SBV-BH-R5q" firstAttribute="leading" secondItem="Xu4-WY-lXv" secondAttribute="leading" constant="8" id="pM8-xe-W2i"/>
                                     <constraint firstAttribute="height" constant="400" id="sMH-Bs-qIO"/>
                                     <constraint firstItem="Eit-yo-Z59" firstAttribute="centerX" secondItem="Xu4-WY-lXv" secondAttribute="centerX" id="ul8-Nl-XMR"/>

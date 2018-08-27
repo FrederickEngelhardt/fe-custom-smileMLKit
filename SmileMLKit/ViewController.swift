@@ -15,37 +15,8 @@ struct imageArray {
     static var images: [UIImage] = []
     static var active: Bool = false
     static var multiplier: Int = 1
-    static var text: String = ""
-}
-class RunQueue {
-    
-    private var lock = NSLock()
-    var maxConcurrent: Int
-    var count = 0
-    
-    init(maxConcurrent: Int) {
-        self.maxConcurrent = maxConcurrent
-    }
-    
-    func pop() {
-        lock.lock()
-        if count > 0 {
-            count -= 1
-        }
-        lock.unlock()
-    }
-    
-    func push() -> Bool {
-        lock.lock()
-        if count < maxConcurrent {
-            count += 1
-            lock.unlock()
-            return true
-        }
-        lock.unlock()
-        return false
-    }
-    
+    static var labelsResults: String = ""
+    static var faceResults: String = ""
 }
 class ViewController: UIViewController {
     let threshold: CGFloat = 0.75
@@ -57,7 +28,7 @@ class ViewController: UIViewController {
         confidenceThreshold: labelConfidenceThreshold
     )
 
-    var startTimeStamp = Date()
+    var startTimeStamp = Date()	
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var detectedInfo: UILabel!
     
@@ -146,8 +117,8 @@ class ViewController: UIViewController {
                 self.detectedInfo.text = "No idea"
                 return
             }
-            imageArray.text += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
-            self.detectedInfo.text = imageArray.text
+            imageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
+            self.detectedInfo.text = imageArray.labelsResults
         }
     }
     func processImage(fromImage image: UIImage) {
@@ -155,6 +126,42 @@ class ViewController: UIViewController {
         self.faceDetection(fromImage: image)
     }
 
+    func grabPhotos(){
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
+        let collection = PHAssetCollection.fetchAssetCollections(with:.album, subtype: .albumRegular, options: fetchOptions)
+        print("Your collection has been found")
+        
+        let photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
+        print("Your collection contains \(photoAssets) photos.")
+        let imageManager = PHCachingImageManager()
+        
+        print(photoAssets, collection)
+        
+        photoAssets.enumerateObjects { (object: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
+            if object is PHAsset! {
+                let asset = object!
+                print("Inside  If object is PHAsset, This is number 1")
+                let imageSize = PHImageManagerMaximumSize
+                let options = PHImageRequestOptions()
+                options.deliveryMode = .highQualityFormat
+                options.resizeMode = .exact
+                options.isSynchronous = true
+                imageManager.requestImage(for: asset,
+                                          targetSize: imageSize,
+                                          contentMode: .aspectFill,
+                                          options: options,
+                                          resultHandler: {
+                                            (image: UIImage!, info)->Void in
+                                            let photo = image!
+                                            self.processImage(fromImage: photo)
+                                            print(photo)
+                                            
+                })
+            }
+        }
+        //        Link to helper code https://stackoverflow.com/questions/28885391/how-to-loop-through-a-photo-gallery-in-swift-with-photos-framework/28904792#28904792
+    }
     
     private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {
         var states = [FaceState]()
@@ -193,9 +200,10 @@ class ViewController: UIViewController {
             let next = personText(forState: faceState, index: index)
             text = text + next + " "
         }
+        if (text == ""){text = "NO FACESTATES"}
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
-        imageArray.text = "\(elapsed) \(text) THIS IS RESPONSe"
-        self.detectedInfo.text = imageArray.text
+        imageArray.faceResults += "\(elapsed) \(text)"
+        self.detectedInfo.text = imageArray.faceResults
     }
     
     private func personText(forState state: FaceState, index: Int) -> String {
@@ -210,7 +218,7 @@ class ViewController: UIViewController {
         let personText = "Person number \(index + 1) \(isSmiling), with \(eyesOpened)."
         let elapsed = Date().timeIntervalSince(startTimeStamp)
 //        _ = "Test took: \(elapsed) \(personText)"
-        return "\(index+1) \(elapsed)"
+        return "\(index+1) \(elapsed) \(personText) "
     }
     
     //MARK: - Alerts
@@ -221,39 +229,7 @@ class ViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
-    func grabPhotos(){
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
-        let collection = PHAssetCollection.fetchAssetCollections(with:.album, subtype: .albumRegular, options: fetchOptions)
-        print("Your collection has been found")
-        
-        var photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
-        print("Your collection contains \(photoAssets) photos.")
-        let imageManager = PHCachingImageManager()
-        
-        print(photoAssets, collection)
- 
-        photoAssets.enumerateObjects { (object: AnyObject!, count: Int, stop: UnsafeMutablePointer) in
-            if object is PHAsset {
-                let asset = object as! PHAsset
-                print("Inside  If object is PHAsset, This is number 1")
-                let imageSize = CGSize(width: asset.pixelWidth,
-                                       height: asset.pixelHeight)
-                let options = PHImageRequestOptions()
-                options.deliveryMode = .highQualityFormat
-                imageManager.requestImage(for: asset,
-                                         targetSize: imageSize,
-                                         contentMode: .aspectFill,
-                                         options: options,
-                                         resultHandler: {
-                                            (image, info)->Void in
-                                            self.processImage(fromImage: image!)
-                                            
-                })
-            }
-        }
-//        Link to helper code https://stackoverflow.com/questions/28885391/how-to-loop-through-a-photo-gallery-in-swift-with-photos-framework/28904792#28904792
-    }
+
     
 }
 
@@ -313,4 +289,15 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         }
     }
 }
+extension UIImage {
+    /// Save PNG in the Documents directory
+    func save(_ name: String) {
+        let path: String = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
+        let url = URL(fileURLWithPath: path).appendingPathComponent(name)
+        try! UIImagePNGRepresentation(self)?.write(to: url)
+        print("saved image at \(url)")
+    }
+}
+
+// Usage: Saves file in the Documents directory
 
