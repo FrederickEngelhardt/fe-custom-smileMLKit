@@ -91,7 +91,7 @@ class ViewController: UIViewController {
             self.presentPhotoPicker(sourceType: .photoLibrary)
         }
         let clear = UIAlertAction(title: "Clear Array", style: .default) {
-            [unowned self] _ in
+            _ in
             imageArray.active = false
             imageArray.images = []
         }
@@ -145,7 +145,7 @@ class ViewController: UIViewController {
         }
     }
     func processImage(fromImage image: UIImage) {
-        self.detect(fromImage: image)
+//        self.detect(fromImage: image)
         self.faceDetection(fromImage: image)
     }
 
@@ -188,7 +188,7 @@ class ViewController: UIViewController {
             text = text + next + " "
         }
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
-        imageArray.text += elapsed
+        imageArray.text = "\(elapsed) \(text)"
         self.detectedInfo.text = imageArray.text
     }
     
@@ -220,10 +220,10 @@ class ViewController: UIViewController {
 
 func faceDetectionOptions() -> VisionFaceDetectorOptions {
     let options = VisionFaceDetectorOptions()
-    options.modeType = .accurate
-    options.landmarkType = .all
-    options.classificationType = .all
-    options.minFaceSize = CGFloat(0.1)
+    options.modeType = .fast
+    options.landmarkType = .none
+    options.classificationType = .none
+    options.minFaceSize = CGFloat(0.2)
     options.isTrackingEnabled = false
     
     
