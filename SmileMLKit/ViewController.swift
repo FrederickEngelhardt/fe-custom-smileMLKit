@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import Dispatch
+import Photos
 
 struct imageArray {
     static var images: [UIImage] = []
@@ -90,6 +91,10 @@ class ViewController: UIViewController {
             imageArray.multiplier = 10
             self.presentPhotoPicker(sourceType: .photoLibrary)
         }
+        let grabPhotosFromAlbum = UIAlertAction(title: "Process Album", style: .default) {
+            [unowned self] _ in
+            self.grabPhotos()
+        }
         let clear = UIAlertAction(title: "Clear Array", style: .default) {
             _ in
             imageArray.active = false
@@ -100,6 +105,7 @@ class ViewController: UIViewController {
         photoSourcePicker.addAction(takePhoto)
         photoSourcePicker.addAction(choosePhoto)
         photoSourcePicker.addAction(choose10Photos)
+        photoSourcePicker.addAction(grabPhotosFromAlbum)
         photoSourcePicker.addAction(clear)
         photoSourcePicker.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
@@ -215,15 +221,48 @@ class ViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
+    func grabPhotos(){
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
+        let collection = PHAssetCollection.fetchAssetCollections(with:.album, subtype: .albumRegular, options: fetchOptions)
+        print("Your collection has been found")
+        
+        var photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
+        print("Your collection contains \(photoAssets) photos.")
+        let imageManager = PHCachingImageManager()
+        
+        print(photoAssets, collection)
+ 
+        photoAssets.enumerateObjects { (object: AnyObject!, count: Int, stop: UnsafeMutablePointer) in
+            if object is PHAsset {
+                let asset = object as! PHAsset
+                print("Inside  If object is PHAsset, This is number 1")
+                let imageSize = CGSize(width: asset.pixelWidth,
+                                       height: asset.pixelHeight)
+                let options = PHImageRequestOptions()
+                options.deliveryMode = .fastFormat
+                imageManager.requestImage(for: asset,
+                                         targetSize: imageSize,
+                                         contentMode: .aspectFill,
+                                         options: options,
+                                         resultHandler: {
+                                            (image, info)->Void in
+                                            self.processImage(fromImage: image!)
+                                            
+                })
+            }
+        }
+//        Link to helper code https://stackoverflow.com/questions/28885391/how-to-loop-through-a-photo-gallery-in-swift-with-photos-framework/28904792#28904792
+    }
     
 }
 
 func faceDetectionOptions() -> VisionFaceDetectorOptions {
     let options = VisionFaceDetectorOptions()
-    options.modeType = .fast
-    options.landmarkType = .none
-    options.classificationType = .none
-    options.minFaceSize = CGFloat(0.2)
+    options.modeType = .accurate
+    options.landmarkType = .all
+    options.classificationType = .all
+    options.minFaceSize = CGFloat(0.1)
     options.isTrackingEnabled = false
     
     
@@ -268,9 +307,10 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
                 value in
 //                self.faceDetection(fromImage: value)
 //                self.processImage(fromImage: value)
-                
-                self.processImage(fromImage: value)
+                self.grabPhotos()
+//                self.processImage(fromImage: value)
             }
         }
     }
 }
+
