@@ -11,13 +11,27 @@ import Firebase
 import Dispatch
 import Photos
 
-struct imageArray {
+struct ImageArray {
     static var images: [UIImage] = []
     static var active: Bool = false
     static var multiplier: Int = 1
     static var labelsResults: String = ""
     static var faceResults: String = ""
 }
+class DataObject {
+    init(data: AnyObject){
+    }
+}
+class ImageData {
+    init(faceData: FaceData, labelData: LabelData){}
+}
+class FaceData {
+    init(score: String, timing: Float){}
+}
+class LabelData {
+    init(score: String, timing: Float){}
+}
+
 class ViewController: UIViewController {
     let threshold: CGFloat = 0.75
     lazy var faceDetector = Vision.vision().faceDetector(options: faceDetectionOptions())
@@ -28,7 +42,7 @@ class ViewController: UIViewController {
         confidenceThreshold: labelConfidenceThreshold
     )
 
-    var startTimeStamp = Date()	
+    var startTimeStamp = Date()
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var detectedInfo: UILabel!
     
@@ -52,14 +66,14 @@ class ViewController: UIViewController {
         }
         let choosePhoto = UIAlertAction(title: "Choose Photo", style: .default) {
             [unowned self] _ in
-            imageArray.multiplier = 1
-            imageArray.active = true
+            ImageArray.multiplier = 1
+            ImageArray.active = true
             self.presentPhotoPicker(sourceType: .photoLibrary)
         }
         let choose10Photos = UIAlertAction(title: "Choose 10 Photos", style: .default) {
             [unowned self] _ in
-            imageArray.active = true
-            imageArray.multiplier = 10
+            ImageArray.active = true
+            ImageArray.multiplier = 10
             self.presentPhotoPicker(sourceType: .photoLibrary)
         }
         let grabPhotosFromAlbum = UIAlertAction(title: "Process Album", style: .default) {
@@ -68,8 +82,8 @@ class ViewController: UIViewController {
         }
         let clear = UIAlertAction(title: "Clear Array", style: .default) {
             _ in
-            imageArray.active = false
-            imageArray.images = []
+            ImageArray.active = false
+            ImageArray.images = []
         }
         
         
@@ -117,8 +131,10 @@ class ViewController: UIViewController {
                 self.detectedInfo.text = "No idea"
                 return
             }
-            imageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
-            self.detectedInfo.text = imageArray.labelsResults
+            ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
+            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
+            print(data)
+            self.detectedInfo.text = ImageArray.labelsResults
         }
     }
     func processImage(fromImage image: UIImage) {
@@ -202,8 +218,9 @@ class ViewController: UIViewController {
         }
         if (text == ""){text = "NO FACESTATES"}
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
-        imageArray.faceResults += "\(elapsed) \(text)"
-        self.detectedInfo.text = imageArray.faceResults
+        ImageArray.faceResults += "\(elapsed) \(text)"
+        self.detectedInfo.text = ImageArray.faceResults
+        
     }
     
     private func personText(forState state: FaceState, index: Int) -> String {
@@ -218,7 +235,7 @@ class ViewController: UIViewController {
         let personText = "Person number \(index + 1) \(isSmiling), with \(eyesOpened)."
         let elapsed = Date().timeIntervalSince(startTimeStamp)
 //        _ = "Test took: \(elapsed) \(personText)"
-        return "\(index+1) \(elapsed) \(personText) "
+        return "\(personText) "
     }
     
     //MARK: - Alerts
@@ -271,15 +288,15 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         
         // Adds a number of images into the array depending on the multiplier.
         var i = 0
-        while i < imageArray.multiplier {
+        while i < ImageArray.multiplier {
             print(i)
-            imageArray.images.append(image)
+            ImageArray.images.append(image)
             i += 1
         }
 
         // Loops through the array and does detection on each photo
-        if (imageArray.active == true) {
-            imageArray.images.map {
+        if (ImageArray.active == true) {
+            ImageArray.images.map {
                 value in
 //                self.faceDetection(fromImage: value)
                 self.processImage(fromImage: value)
