@@ -19,8 +19,7 @@ struct ImageArray {
     static var faceResults: String = ""
 }
 class DataObject {
-    init(data: AnyObject){
-    }
+    init(data: AnyObject){}
 }
 class ImageData {
     init(faceData: FaceData, labelData: LabelData){}
@@ -132,8 +131,8 @@ class ViewController: UIViewController {
                 return
             }
             ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
-            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
-            print(data)
+//            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
+            print(labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }, "THIS IS DATA")
             self.detectedInfo.text = ImageArray.labelsResults
         }
     }
@@ -156,7 +155,7 @@ class ViewController: UIViewController {
         
         photoAssets.enumerateObjects { (object: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
             if object is PHAsset! {
-                let asset = object!
+                guard let asset = object else {return}
                 print("Inside  If object is PHAsset, This is number 1")
                 let imageSize = PHImageManagerMaximumSize
                 let options = PHImageRequestOptions()
@@ -170,8 +169,13 @@ class ViewController: UIViewController {
                                           resultHandler: {
                                             (image: UIImage!, info)->Void in
                                             let photo = image!
+//                                            print("orientation", photo.imageOrientation)
+                                            if (photo.imageOrientation == UIImageOrientation.up){print("up")}
+                                            if (photo.imageOrientation == UIImageOrientation.down){print("down")}
+                                            print("Height, \(image.size.height), Width: \(image.size.width) ")
+                                            print("beforeProcess", photo)
                                             self.processImage(fromImage: photo)
-                                            print(photo)
+                                            print("afterProcess", photo)
                                             
                 })
             }
@@ -218,6 +222,7 @@ class ViewController: UIViewController {
         }
         if (text == ""){text = "NO FACESTATES"}
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
+        print("\(elapsed) \(text)")
         ImageArray.faceResults += "\(elapsed) \(text)"
         self.detectedInfo.text = ImageArray.faceResults
         
@@ -233,7 +238,7 @@ class ViewController: UIViewController {
             eyesOpened = "one eye closed and one opened"
         }
         let personText = "Person number \(index + 1) \(isSmiling), with \(eyesOpened)."
-        let elapsed = Date().timeIntervalSince(startTimeStamp)
+//        let elapsed = Date().timeIntervalSince(startTimeStamp)
 //        _ = "Test took: \(elapsed) \(personText)"
         return "\(personText) "
     }
@@ -299,6 +304,9 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
             ImageArray.images.map {
                 value in
 //                self.faceDetection(fromImage: value)
+//                print("height \(value.size.height)")
+                print(value)
+                if (value.imageOrientation == UIImageOrientation.up){print("inside MAP orientation is UP")}
                 self.processImage(fromImage: value)
 //                self.grabPhotos()
 //                self.processImage(fromImage: value)
