@@ -4,6 +4,7 @@
 //
 //  Created by Martin Mitrevski on 11.05.18.
 //  Copyright © 2018 Mitrevski. All rights reserved.
+//  Copyright Frederick Engelhardt. All Rights Reserved
 //
 
 import UIKit
@@ -176,8 +177,8 @@ class ViewController: UIViewController {
     }
     
     func processImage(fromImage image: UIImage) {
-        self.detect(fromImage: image)
-//        self.faceDetection(fromImage: image)
+//        self.detect(fromImage: image)
+        self.faceDetection(fromImage: image)
     }
     
     func loadImagesFromAlbum(folderName:String) -> [String]{
@@ -205,7 +206,7 @@ class ViewController: UIViewController {
         
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
-        let collection = PHAssetCollection.fetchAssetCollections(with:.album, subtype: .albumRegular, options: fetchOptions)
+        let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .albumRegular, options: fetchOptions)
         print("Your collection has been found")
         
         let photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
@@ -219,7 +220,7 @@ class ViewController: UIViewController {
 //                let imageSize = PHImageManagerMaximumSize
         
         
-            let size = CGSize(width: 200, height: 200)
+            let size = CGSize(width: 256, height: 256)
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
             options.isSynchronous = false
@@ -231,6 +232,7 @@ class ViewController: UIViewController {
                   options: options,
                   resultHandler: {
                     (image: UIImage!, info)->Void in
+                    
                     let photo = image!
                     print("Width: \(photo.size.width) Height: \(photo.size.height), Scale: \(photo.scale) Orientation: \(photo.imageOrientation) ")
                     print("beforeProcess", photo)
