@@ -140,8 +140,28 @@ class ViewController: UIViewController {
 //        self.detect(fromImage: image)
         self.faceDetection(fromImage: image)
     }
-
+    func loadImagesFromAlbum(folderName:String) -> [String]{
+        
+        let nsDocumentDirectory = FileManager.SearchPathDirectory.documentDirectory
+        let nsUserDomainMask    = FileManager.SearchPathDomainMask.userDomainMask
+        let paths               = NSSearchPathForDirectoriesInDomains(nsDocumentDirectory, nsUserDomainMask, true)
+        var theItems = [String]()
+        if let dirPath          = paths.first
+        {
+            let imageURL = URL(fileURLWithPath: dirPath).appendingPathComponent(folderName)
+            
+            do {
+                theItems = try FileManager.default.contentsOfDirectory(atPath: imageURL.path)
+                return theItems
+            } catch let error as NSError {
+                print(error.localizedDescription)
+                return theItems
+            }
+        }
+        return theItems
+    }
     func grabPhotos(){
+        
         let fetchOptions = PHFetchOptions()
         fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
         let collection = PHAssetCollection.fetchAssetCollections(with:.album, subtype: .albumRegular, options: fetchOptions)
@@ -153,32 +173,52 @@ class ViewController: UIViewController {
         
         print(photoAssets, collection)
         
-        photoAssets.enumerateObjects { (object: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
-            if object is PHAsset! {
-                guard let asset = object else {return}
-                print("Inside  If object is PHAsset, This is number 1")
-                let imageSize = PHImageManagerMaximumSize
-                let options = PHImageRequestOptions()
-                options.deliveryMode = .highQualityFormat
-                options.resizeMode = .exact
-                options.isSynchronous = true
-                imageManager.requestImage(for: asset,
-                                          targetSize: imageSize,
-                                          contentMode: .aspectFill,
-                                          options: options,
-                                          resultHandler: {
-                                            (image: UIImage!, info)->Void in
-                                            let photo = image!
-//                                            print("orientation", photo.imageOrientation)
-                                            if (photo.imageOrientation == UIImageOrientation.up){print("up")}
-                                            if (photo.imageOrientation == UIImageOrientation.down){print("down")}
-                                            print("Height, \(image.size.height), Width: \(image.size.width) ")
-                                            print("beforeProcess", photo)
-                                            self.processImage(fromImage: photo)
-                                            print("afterProcess", photo)
-                                            
+        photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
+//                guard let asset = object else {return}
+//                let imageSize = PHImageManagerMaximumSize
+        
+        
+            let size = CGSize(width: 200, height: 200)
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .highQualityFormat
+            options.isSynchronous = false
+            options.version = .original
+            options.resizeMode = .none
+            imageManager.requestImage(for: asset,
+                  targetSize: size,
+                  contentMode: .aspectFit,
+                  options: options,
+                  resultHandler: {
+                    (image: UIImage!, info)->Void in
+                    let photo = image!
+                    print(photo.scale, "this is scale", photo.imageOrientation)
+                    var rotatedImage = UIImage()
+                    switch image.imageOrientation
+                    {
+                    case .right:
+                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .down)
+                        print(rotatedImage)
+
+                    case .down:
+                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .left)
+                        print(rotatedImage)
+
+                    case .left:
+                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .up)
+                        print(rotatedImage)
+
+                    default:
+                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .right)
+                        print(rotatedImage)
+                    }
+                    if (photo.imageOrientation == UIImageOrientation.up){print("up")}
+                    if (photo.imageOrientation == UIImageOrientation.down){print("down")}
+                    print("Height, \(photo.size.height), Width: \(photo.size.width) ")
+                    print("beforeProcess", photo)
+                    self.imageView.image = image
+                    self.processImage(fromImage: image)
+                    print("afterProcess", photo)
                 })
-            }
         }
         //        Link to helper code https://stackoverflow.com/questions/28885391/how-to-loop-through-a-photo-gallery-in-swift-with-photos-framework/28904792#28904792
     }
