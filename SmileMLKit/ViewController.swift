@@ -40,6 +40,9 @@ class ViewController: UIViewController {
     let options = VisionLabelDetectorOptions(
         confidenceThreshold: labelConfidenceThreshold
     )
+    
+    var interpreter: ModelInterpreter!
+    var ioOptions: ModelInputOutputOptions!
 
     var startTimeStamp = Date()
     @IBOutlet weak var imageView: UIImageView!
@@ -49,7 +52,39 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         labelDetector = vision.labelDetector(options: options)
+        self.modelSetup()
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    func modelSetup() {
+        let conditions = ModelDownloadConditions(wiFiRequired: true, idleRequired: false)
+        let cloudModelSource = CloudModelSource(
+            modelName: "mobilenet",
+            enableModelUpdates: true,
+            initialConditions: conditions,
+            updateConditions: conditions
+        )
+        _ = ModelManager.modelManager().register(cloudModelSource)
+        
+        guard let modelPath = Bundle.main.path(forResource: "mobilenet", ofType: "tflite") else {
+            return
+        }
+        let localModelSource = LocalModelSource(modelName: "my_local_model",
+                                                path: modelPath)
+        ModelManager.modelManager().register(localModelSource)
+        
+        let options = ModelOptions(
+            cloudModelName: nil,
+            localModelName: "my_local_model"
+        )
+        interpreter = ModelInterpreter(options: options)
+        
+        ioOptions = ModelInputOutputOptions()
+        do {
+            try ioOptions.setInputFormat(index: 0, type: ModelElementType.uInt8, dimensions: [1, 224, 224, 3])
+            try ioOptions.setOutputFormat(index: 0, type: ModelElementType.uInt8, dimensions: [1, NSNumber(value: 1001)])
+        } catch let error as NSError {
+            print("Failed to set input or output format with error: \(error.localizedDescription)")
+        }
     }
     
     @IBAction func selectImageTapped(_ sender: UIButton) {
@@ -122,6 +157,7 @@ class ViewController: UIViewController {
             }
     }
     func detect(fromImage image: UIImage) {
+        startTimeStamp = Date()
         let v = VisionImage(image: image)
         labelDetector.detect(in: v) { (labels, error) in
             //            self.runQueue.pop()
@@ -130,16 +166,20 @@ class ViewController: UIViewController {
                 self.detectedInfo.text = "No idea"
                 return
             }
-            ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }
+            let elapsed = "\(Date().timeIntervalSince(self.startTimeStamp))"
+            ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence)) \(elapsed) \n" }
 //            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
+
             print(labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }, "THIS IS DATA")
             self.detectedInfo.text = ImageArray.labelsResults
         }
     }
+    
     func processImage(fromImage image: UIImage) {
-//        self.detect(fromImage: image)
-        self.faceDetection(fromImage: image)
+        self.detect(fromImage: image)
+//        self.faceDetection(fromImage: image)
     }
+    
     func loadImagesFromAlbum(folderName:String) -> [String]{
         
         let nsDocumentDirectory = FileManager.SearchPathDirectory.documentDirectory
@@ -160,6 +200,7 @@ class ViewController: UIViewController {
         }
         return theItems
     }
+    
     func grabPhotos(){
         
         let fetchOptions = PHFetchOptions()
@@ -191,29 +232,7 @@ class ViewController: UIViewController {
                   resultHandler: {
                     (image: UIImage!, info)->Void in
                     let photo = image!
-                    print(photo.scale, "this is scale", photo.imageOrientation)
-                    var rotatedImage = UIImage()
-                    switch image.imageOrientation
-                    {
-                    case .right:
-                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .down)
-                        print(rotatedImage)
-
-                    case .down:
-                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .left)
-                        print(rotatedImage)
-
-                    case .left:
-                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .up)
-                        print(rotatedImage)
-
-                    default:
-                        rotatedImage = UIImage(cgImage: image.cgImage!, scale: 1.0, orientation: .right)
-                        print(rotatedImage)
-                    }
-                    if (photo.imageOrientation == UIImageOrientation.up){print("up")}
-                    if (photo.imageOrientation == UIImageOrientation.down){print("down")}
-                    print("Height, \(photo.size.height), Width: \(photo.size.width) ")
+                    print("Width: \(photo.size.width) Height: \(photo.size.height), Scale: \(photo.scale) Orientation: \(photo.imageOrientation) ")
                     print("beforeProcess", photo)
                     self.imageView.image = image
                     self.processImage(fromImage: image)

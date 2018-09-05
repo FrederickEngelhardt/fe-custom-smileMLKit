@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C169AAB21401F46004436BB /* models in Resources */ = {isa = PBXBuildFile; fileRef = 4C169AAA21401F46004436BB /* models */; };
 		89A474825554B8B5C5C63073 /* Pods_SmileMLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E9C33E49DCD14FEF163D482 /* Pods_SmileMLKit.framework */; };
 		E8D37C6F20A5BB2300B86673 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D37C6E20A5BB2300B86673 /* AppDelegate.swift */; };
 		E8D37C7120A5BB2300B86673 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D37C7020A5BB2300B86673 /* ViewController.swift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4C169AAA21401F46004436BB /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = models; sourceTree = "<group>"; };
 		4FCCE62207BC7FA390969478 /* Pods-SmileMLKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SmileMLKit.release.xcconfig"; path = "Pods/Target Support Files/Pods-SmileMLKit/Pods-SmileMLKit.release.xcconfig"; sourceTree = "<group>"; };
 		5333E431A74859F2AFC6C74F /* Pods-SmileMLKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SmileMLKit.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SmileMLKit/Pods-SmileMLKit.debug.xcconfig"; sourceTree = "<group>"; };
 		6E9C33E49DCD14FEF163D482 /* Pods_SmileMLKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SmileMLKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -89,6 +91,7 @@
 				E8D37C7220A5BB2300B86673 /* Main.storyboard */,
 				E8D37C7520A5BB2400B86673 /* Assets.xcassets */,
 				E8D37C7720A5BB2400B86673 /* LaunchScreen.storyboard */,
+				4C169AAA21401F46004436BB /* models */,
 				E8D37C7A20A5BB2400B86673 /* Info.plist */,
 				E8D37C8020A5D52200B86673 /* Placeholder.png */,
 				E8D37C8220A5DE5800B86673 /* FaceState.swift */,
@@ -159,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8D37C7920A5BB2400B86673 /* LaunchScreen.storyboard in Resources */,
+				4C169AAB21401F46004436BB /* models in Resources */,
 				E8D37C8120A5D52200B86673 /* Placeholder.png in Resources */,
 				E8D37C8520A5E51100B86673 /* GoogleService-Info.plist in Resources */,
 				E8D37C7620A5BB2400B86673 /* Assets.xcassets in Resources */,
