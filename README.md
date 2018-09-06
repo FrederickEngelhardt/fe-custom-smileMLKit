@@ -2,7 +2,7 @@
 
 ### Installation
 
-1. Sign up for firebase and download the **GoogleService-Info.plist** and put that inside the SmileMLKit directory.
+1. Sign up for firebase and download the ```GoogleService-Info.plist``` and put that inside the SmileMLKit folder.
 
 2. Install cocoapods then run:
   ```
