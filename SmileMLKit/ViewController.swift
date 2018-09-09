@@ -162,15 +162,27 @@ class ViewController: UIViewController {
         startTimeStamp = Date()
         let v = VisionImage(image: image)
         labelDetector.detect(in: v) { (labels, error) in
-            //            self.runQueue.pop()
             guard error == nil, let labels = labels, !labels.isEmpty else {
                 // Error.
                 self.detectedInfo.text = "No idea"
+                let labelError = ["ERROR": "NO RESULTS FOUND FOR THIS IMAGE"]
+                let data: [String: [String: Any]] = [
+                    image_name: [
+                        "image_id": image_id,
+                        "image_name": image_name,
+                        "image_tags": labelError,
+                        "image_properties": image_properties
+                    ]
+                ]
+                var dataDictionary = JsonFunctions.DataStack()
+                dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
+                
+                
                 return
             }
             let elapsed = "\(Date().timeIntervalSince(self.startTimeStamp))"
             
-//            ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence)) \(elapsed) \n" }
+            ImageArray.labelsResults = labels.reduce("") { $0 + "\($1.label) (\($1.confidence)) \(elapsed) \n" }
 //            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
             
             let myLabels = labels.reduce("") { $0 + "\($1.label) (\($1.confidence))" }
@@ -222,7 +234,7 @@ class ViewController: UIViewController {
     func grabPhotos(){
         
         let fetchOptions = PHFetchOptions()
-        fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "SampleSet")
         let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .albumRegular, options: fetchOptions)
         print("Your collection has been found")
         
@@ -231,7 +243,6 @@ class ViewController: UIViewController {
         
         print(photoAssets, collection)
         print(photoAssets.count)
-        var count = 0
         photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
@@ -260,7 +271,7 @@ class ViewController: UIViewController {
                                 let count = arr.count
                                 let fileName = "\(arr[count-1])"
                                 print(fileName)
-                                self.processImage(fromImage: image, image_id: "\(count)", image_name: fileName, image_properties: image_properties)
+                                self.processImage(fromImage: image, image_id: "\(ImageArray.count)", image_name: fileName, image_properties: image_properties)
                                 ImageArray.count += 1
                             }
                         }
