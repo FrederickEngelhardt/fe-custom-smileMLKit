@@ -156,7 +156,7 @@ class ViewController: UIViewController {
                 print("completed image!")
             }
     }
-    func detect(fromImage image: UIImage) {
+    func detect(fromImage image: UIImage, image_id: String, image_properties: [String: String]) {
         startTimeStamp = Date()
         let v = VisionImage(image: image)
         labelDetector.detect(in: v) { (labels, error) in
@@ -175,15 +175,25 @@ class ViewController: UIViewController {
             let labelData = labels.map {ele in
                 return ["name": ele.label, "confidence": ele.confidence]
             }
-            print(labelData)
-            
+            let data: [String: [String: Any]] = [
+                image_id: [
+                    "image_id": image_id,
+                    "image_name": image_id,
+                    "image_tags": labelData,
+                    "image_properties": image_properties
+                ]
+            ]
+            var dataDictionary = JsonFunctions.DataStack()
+            dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
+            print("\n", JsonFunctions.AllImages.data)
             self.detectedInfo.text = ImageArray.labelsResults
         }
     }
     
-    func processImage(fromImage image: UIImage, imageProperties: [String: String]? = nil) {
-        self.detect(fromImage: image)
-        self.faceDetection(fromImage: image)
+    // Main function that calls all MLKit detections
+    func processImage(fromImage image: UIImage, image_name: String? = nil, image_properties: [String: String]? = nil) {
+        self.detect(fromImage: image, image_id: image_name!, image_properties: image_properties!)
+//        self.faceDetection(fromImage: image)
     }
     
     func loadImagesFromAlbum(folderName:String) -> [String]{
@@ -216,35 +226,45 @@ class ViewController: UIViewController {
         
         let photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
         print("Your collection contains \(photoAssets) photos.")
-        let imageManager = PHCachingImageManager()
         
         print(photoAssets, collection)
         
         photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
-
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
             options.isSynchronous = true
             options.version = .original
             options.resizeMode = .none
             PHImageManager.default().requestImageData(for: asset, options: options,
-                                                      resultHandler: { (imagedata, dataUTI, orientation, info) in
-                                                        guard let image = imagedata else {
-                                                            return
-                                                        }
-                                                        let ui = UIImage(data: image)!
-                                                        print(ui)
-                                                        self.processImage(fromImage: ui)
-                                                        if let info = info {
-                                                            if info.keys.contains(NSString(string: "PHImageFileURLKey")) {
-                                                                if let path = info[NSString(string: "PHImageFileURLKey")] as? NSURL {
-                                                                    print(path)
-                                                                }
-                                                            }
-                                                        }
+                  resultHandler: { (imagedata, dataUTI, orientation, info) in
+                    guard let image_data = imagedata else {
+                        return
+                    }
+                    guard let image = UIImage(data: image_data) else {return}
+                    let image_properties: [String: String] = [
+                        "width": "\(image.size.width)",
+                        "height": "\(image.size.height)",
+                        "scale": "\(image.size.height)",
+                        "orientation": "\(image.imageOrientation)"
+                    ]
+
+                    if let info = info {
+                        if info.keys.contains(NSString(string: "PHImageFileURLKey")) {
+                            if let path = info[NSString(string: "PHImageFileURLKey")] as? NSURL {
+                                print(path)
+                                let path_string = "\("\(path)".split(separator: ".")[0])"
+                                let arr = path_string.split(separator: "/")
+                                let count = arr.count
+                                let fileName = "\(arr[count-1])"
+                                print(fileName)
+                                self.processImage(fromImage: image, image_name: fileName, image_properties: image_properties)
+                            }
+                        }
+                    }
             })
         }
         //        Link to helper code https://stackoverflow.com/questions/28885391/how-to-loop-through-a-photo-gallery-in-swift-with-photos-framework/28904792#28904792
+        //        PHImageManger vs fetchImage https://stackoverflow.com/questions/30288789/requesting-images-to-phimagemanager-results-in-wrong-image-in-ios-8-3
     }
     
     private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {

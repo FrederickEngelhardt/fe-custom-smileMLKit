@@ -66,12 +66,6 @@ struct JsonFunctions {
             "image_tags": ""
         ]
         
-        
-        
-        func peek()-> [String: Any] {
-            return imageData
-        }
-        
         // Evaluate will grab the data and either create a new imageData dictionary or patch the existing dictionary.
         mutating func evaluate(image_id: String, type: String, data: [String: [String: Any]]){
             let length: Int = AllImages.data.count
