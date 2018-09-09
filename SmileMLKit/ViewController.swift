@@ -199,7 +199,10 @@ class ViewController: UIViewController {
             ]
             var dataDictionary = JsonFunctions.DataStack()
             dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
-            print("\n", JsonFunctions.AllImages.data)
+            print("THIS IS COUNT", ImageArray.count, image_id)
+            if ("\(ImageArray.folderMaxCount)" == image_id){
+                print(JsonFunctions.AllImages.data)
+            }
             self.detectedInfo.text = ImageArray.labelsResults
         }
     }
@@ -241,8 +244,8 @@ class ViewController: UIViewController {
         let photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
         print("Your collection contains \(photoAssets) photos.")
         
-        print(photoAssets, collection)
-        print(photoAssets.count)
+        ImageArray.folderMaxCount = photoAssets.count
+        print("You are processing: \(ImageArray.folderMaxCount) Images")
         photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
@@ -265,14 +268,14 @@ class ViewController: UIViewController {
                     if let info = info {
                         if info.keys.contains(NSString(string: "PHImageFileURLKey")) {
                             if let path = info[NSString(string: "PHImageFileURLKey")] as? NSURL {
-                                print(path)
                                 let path_string = "\("\(path)".split(separator: ".")[0])"
                                 let arr = path_string.split(separator: "/")
                                 let count = arr.count
                                 let fileName = "\(arr[count-1])"
-                                print(fileName)
-                                self.processImage(fromImage: image, image_id: "\(ImageArray.count)", image_name: fileName, image_properties: image_properties)
+                                
+                                // Count starts at 1 and will increment until it reaches the ImageArry.folderMaxCount value.
                                 ImageArray.count += 1
+                                self.processImage(fromImage: image, image_id: "\(ImageArray.count)", image_name: fileName, image_properties: image_properties)
                             }
                         }
                     }
