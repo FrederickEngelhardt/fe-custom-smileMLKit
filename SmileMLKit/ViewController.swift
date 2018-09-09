@@ -144,7 +144,7 @@ class ViewController: UIViewController {
     
     // MARK: - Face Detection
     
-    private func faceDetection(fromImage image: UIImage) {
+    private func faceDetection(fromImage image: UIImage,_ image_id: String,_ image_name: String,_ image_properties: [String: String]) {
         startTimeStamp = Date()
         let visionImage = VisionImage(image: image)
         faceDetector.detect(in: visionImage) { [unowned self] (faces, error) in
@@ -153,7 +153,7 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                let faceStates = self.faceStates(forDetectedFaces: detectedFaces)
+                let faceStates = self.faceStates(forDetectedFaces: detectedFaces, image_id,image_name,image_properties)
                 self.updateDetectedInfo(forFaceStates: faceStates)
                 print("completed image!")
             }
@@ -201,7 +201,8 @@ class ViewController: UIViewController {
             dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
             print("THIS IS COUNT", ImageArray.count, image_id)
             if ("\(ImageArray.folderMaxCount)" == image_id){
-                print(JsonFunctions.AllImages.data)
+//                print(JsonFunctions.AllImages.data)
+                print("This is the console output: \(JsonFunctions.AllImages.data as AnyObject)")
             }
             self.detectedInfo.text = ImageArray.labelsResults
         }
@@ -209,8 +210,8 @@ class ViewController: UIViewController {
     
     // Main function that calls all MLKit detections
     func processImage(fromImage image: UIImage, image_id: String, image_name: String? = nil, image_properties: [String: String]? = nil) {
-        self.detect(fromImage: image, image_id: image_id, image_name: image_name!, image_properties: image_properties!)
-//        self.faceDetection(fromImage: image)
+//        self.detect(fromImage: image, image_id: image_id, image_name: image_name!, image_properties: image_properties!)
+        self.faceDetection(fromImage: image, image_id, image_name!, image_properties!)
     }
     
     func loadImagesFromAlbum(folderName:String) -> [String]{
@@ -237,7 +238,7 @@ class ViewController: UIViewController {
     func grabPhotos(){
         
         let fetchOptions = PHFetchOptions()
-        fetchOptions.predicate = NSPredicate(format: "title = %@", "SampleSet")
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
         let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .albumRegular, options: fetchOptions)
         print("Your collection has been found")
         
@@ -258,11 +259,28 @@ class ViewController: UIViewController {
                         return
                     }
                     guard let image = UIImage(data: image_data) else {return}
+                    var orientation: String = ""
+                    switch(image.imageOrientation){
+                    case .up:
+                        orientation = "up"
+                        break
+                    case .down:
+                        orientation = "down"
+                        break
+                    case .left:
+                        orientation = "left"
+                        break
+                    case .right:
+                        orientation = "right"
+                        break
+                    default:
+                        orientation = "Not a normal orienation"
+                    }
                     let image_properties: [String: String] = [
                         "width": "\(image.size.width)",
                         "height": "\(image.size.height)",
                         "scale": "\(image.size.height)",
-                        "orientation": "\(image.imageOrientation)"
+                        "orientation": "\(orientation)"
                     ]
 
                     if let info = info {
@@ -285,30 +303,63 @@ class ViewController: UIViewController {
         //        PHImageManger vs fetchImage https://stackoverflow.com/questions/30288789/requesting-images-to-phimagemanager-results-in-wrong-image-in-ios-8-3
     }
     
-    private func faceStates(forDetectedFaces faces: [VisionFace]) -> [FaceState] {
+    private func faceStates(forDetectedFaces faces: [VisionFace], _ image_id: String,_ image_name: String,_ image_properties: [String: String]) -> [FaceState] {
         var states = [FaceState]()
+        var stateJSON: [[String: Any]] = []
         for face in faces {
             var isSmiling = false
+            var iSConfidence = CGFloat()
             var leftEyeOpen = false
+            var lEConfidence = CGFloat()
             var rightEyeOpen = false
+            var rEConfidence = CGFloat()
             if face.hasSmilingProbability {
                 isSmiling = self.isPositive(forProbability: face.smilingProbability)
+                iSConfidence = face.smilingProbability
             }
             
             if face.hasRightEyeOpenProbability {
                 rightEyeOpen = self.isPositive(forProbability: face.rightEyeOpenProbability)
+                rEConfidence = face.rightEyeOpenProbability
             }
             
             if face.hasLeftEyeOpenProbability {
                 leftEyeOpen = self.isPositive(forProbability: face.leftEyeOpenProbability)
+                lEConfidence = face.leftEyeOpenProbability
             }
-            
+            let faceStateJSON: [String: [String: String]] = [
+                "is_smiling": ["value": "\(isSmiling)", "confidence": "\(iSConfidence)"],
+                "left_eye_open": ["value": "\(leftEyeOpen)", "confidence": "\(lEConfidence)"],
+                "right_eye_open": ["value": "\(rightEyeOpen)", "confidence": "\(rEConfidence)"]
+            ]
             let faceState = FaceState(smiling: isSmiling,
                                       leftEyeOpen: leftEyeOpen,
                                       rightEyeOpen: rightEyeOpen)
             states.append(faceState)
+            stateJSON.append(faceStateJSON)
         }
+        // If no values returned add a error message
+        if (stateJSON.count == 0){stateJSON.append(["Error?": "No Faces Detected"])}
+//        dump(stateJSON)
+         print("This is the console output: \(stateJSON as AnyObject)")
         
+        // This were we update the global JSON object
+        let data: [String: [String: Any]] = [
+            image_name: [
+                "image_id": image_id,
+                "image_name": image_name,
+                "face_data": stateJSON,
+                "image_properties": image_properties
+            ]
+        ]
+        var dataDictionary = JsonFunctions.DataStack()
+        dataDictionary.evaluate(image_id: image_id, type: "face", data: data)
+        print("THIS IS CURRENT FACE INDEX", JsonFunctions.AllImages.faceIndex)
+        if (ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
+            //                print(JsonFunctions.AllImages.data)
+            print("ALLIMAGES JSON DATA: \(JsonFunctions.AllImages.data as AnyObject)")
+        }
+        self.detectedInfo.text = ImageArray.labelsResults
         return states
     }
     
@@ -323,8 +374,11 @@ class ViewController: UIViewController {
             text = text + next + " "
         }
         if (text == ""){text = "NO FACESTATES"}
+        // Add this text to JSON Object
+        
+        
         let elapsed = "\(Date().timeIntervalSince(startTimeStamp))"
-        print("\(elapsed) \(text)")
+//        print("\(elapsed) \(text)")
         ImageArray.faceResults += "\(elapsed) \(text)"
         self.detectedInfo.text = ImageArray.faceResults
         
@@ -403,7 +457,7 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 
         // Loops through the array and does detection on each photo
         if (ImageArray.active == true) {
-            ImageArray.images.map {
+            ImageArray.images.forEach {
                 value in
 //                self.faceDetection(fromImage: value)
 //                print("height \(value.size.height)")
