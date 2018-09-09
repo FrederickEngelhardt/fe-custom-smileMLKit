@@ -2,8 +2,7 @@
 //  ViewController.swift
 //  SmileMLKit
 //
-//  Created by Martin Mitrevski on 11.05.18.
-//  Copyright © 2018 Mitrevski. All rights reserved.
+//  Updated 09/07/2018
 //  Copyright Frederick Engelhardt. All Rights Reserved
 //
 
@@ -168,17 +167,23 @@ class ViewController: UIViewController {
                 return
             }
             let elapsed = "\(Date().timeIntervalSince(self.startTimeStamp))"
-            ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence)) \(elapsed) \n" }
+            
+//            ImageArray.labelsResults += labels.reduce("") { $0 + "\($1.label) (\($1.confidence)) \(elapsed) \n" }
 //            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
-
-            print(labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }, "THIS IS DATA")
+            
+            let myLabels = labels.reduce("") { $0 + "\($1.label) (\($1.confidence))" }
+            let labelData = labels.map {ele in
+                return ["name": ele.label, "confidence": ele.confidence]
+            }
+            print(labelData)
+            
             self.detectedInfo.text = ImageArray.labelsResults
         }
     }
     
     func processImage(fromImage image: UIImage) {
-//        self.detect(fromImage: image)
-        self.faceDetection(fromImage: image)
+        self.detect(fromImage: image)
+//        self.faceDetection(fromImage: image)
     }
     
     func loadImagesFromAlbum(folderName:String) -> [String]{
