@@ -181,9 +181,9 @@ class ViewController: UIViewController {
         }
     }
     
-    func processImage(fromImage image: UIImage) {
+    func processImage(fromImage image: UIImage, imageProperties: [String: String]? = nil) {
         self.detect(fromImage: image)
-//        self.faceDetection(fromImage: image)
+        self.faceDetection(fromImage: image)
     }
     
     func loadImagesFromAlbum(folderName:String) -> [String]{
@@ -221,30 +221,28 @@ class ViewController: UIViewController {
         print(photoAssets, collection)
         
         photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
-//                guard let asset = object else {return}
-//                let imageSize = PHImageManagerMaximumSize
-        
-        
-            let size = CGSize(width: 256, height: 256)
+
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
-            options.isSynchronous = false
+            options.isSynchronous = true
             options.version = .original
             options.resizeMode = .none
-            imageManager.requestImage(for: asset,
-                  targetSize: size,
-                  contentMode: .aspectFit,
-                  options: options,
-                  resultHandler: {
-                    (image: UIImage!, info)->Void in
-                    
-                    let photo = image!
-                    print("Width: \(photo.size.width) Height: \(photo.size.height), Scale: \(photo.scale) Orientation: \(photo.imageOrientation) ")
-                    print("beforeProcess", photo)
-                    self.imageView.image = image
-                    self.processImage(fromImage: image)
-                    print("afterProcess", photo)
-                })
+            PHImageManager.default().requestImageData(for: asset, options: options,
+                                                      resultHandler: { (imagedata, dataUTI, orientation, info) in
+                                                        guard let image = imagedata else {
+                                                            return
+                                                        }
+                                                        let ui = UIImage(data: image)!
+                                                        print(ui)
+                                                        self.processImage(fromImage: ui)
+                                                        if let info = info {
+                                                            if info.keys.contains(NSString(string: "PHImageFileURLKey")) {
+                                                                if let path = info[NSString(string: "PHImageFileURLKey")] as? NSURL {
+                                                                    print(path)
+                                                                }
+                                                            }
+                                                        }
+            })
         }
         //        Link to helper code https://stackoverflow.com/questions/28885391/how-to-loop-through-a-photo-gallery-in-swift-with-photos-framework/28904792#28904792
     }
@@ -374,8 +372,6 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
                 print(value)
                 if (value.imageOrientation == UIImageOrientation.up){print("inside MAP orientation is UP")}
                 self.processImage(fromImage: value)
-//                self.grabPhotos()
-//                self.processImage(fromImage: value)
             }
         }
     }
