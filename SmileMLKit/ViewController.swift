@@ -178,7 +178,7 @@ class ViewController: UIViewController {
                 return ["name": ele.label, "confidence": ele.confidence]
             }
             let data: [String: [String: Any]] = [
-            image_id: [
+            image_name: [
                     "image_id": image_id,
                     "image_name": image_name,
                     "image_tags": labelData,
