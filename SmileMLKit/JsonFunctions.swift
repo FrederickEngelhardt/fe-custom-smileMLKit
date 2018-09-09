@@ -66,6 +66,7 @@ struct JsonFunctions {
             "image_tags": ""
         ]
         
+        
         // Evaluate will grab the data and either create a new imageData dictionary or patch the existing dictionary.
         mutating func evaluate(image_id: String, type: String, data: [String: [String: Any]]){
             let length: Int = AllImages.data.count
@@ -97,7 +98,7 @@ struct JsonFunctions {
         mutating func patch(_ image_id: String, _ type: String, _ element: [String: [String: Any]]) -> [String: [String: Any]] {
             switch(type){
             case "face":
-                print("Patching face data")
+                print("Patching face data")    
                 if let data = element[image_id]!["face_data"] as? [String: [String: Any]] {
                     AllImages.data[image_id]!["face_data"] = data
                 }

@@ -17,6 +17,8 @@ struct ImageArray {
     static var multiplier: Int = 1
     static var labelsResults: String = ""
     static var faceResults: String = ""
+    static var folderMaxCount: Int = 0
+    static var count: Int = 0
 }
 class DataObject {
     init(data: AnyObject){}
@@ -156,7 +158,7 @@ class ViewController: UIViewController {
                 print("completed image!")
             }
     }
-    func detect(fromImage image: UIImage, image_id: String, image_properties: [String: String]) {
+    func detect(fromImage image: UIImage, image_id: String, image_name: String, image_properties: [String: String]) {
         startTimeStamp = Date()
         let v = VisionImage(image: image)
         labelDetector.detect(in: v) { (labels, error) in
@@ -176,12 +178,12 @@ class ViewController: UIViewController {
                 return ["name": ele.label, "confidence": ele.confidence]
             }
             let data: [String: [String: Any]] = [
-                image_id: [
+            image_id: [
                     "image_id": image_id,
-                    "image_name": image_id,
+                    "image_name": image_name,
                     "image_tags": labelData,
                     "image_properties": image_properties
-                ]
+                    ]
             ]
             var dataDictionary = JsonFunctions.DataStack()
             dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
@@ -191,8 +193,8 @@ class ViewController: UIViewController {
     }
     
     // Main function that calls all MLKit detections
-    func processImage(fromImage image: UIImage, image_name: String? = nil, image_properties: [String: String]? = nil) {
-        self.detect(fromImage: image, image_id: image_name!, image_properties: image_properties!)
+    func processImage(fromImage image: UIImage, image_id: String, image_name: String? = nil, image_properties: [String: String]? = nil) {
+        self.detect(fromImage: image, image_id: image_id, image_name: image_name!, image_properties: image_properties!)
 //        self.faceDetection(fromImage: image)
     }
     
@@ -228,7 +230,8 @@ class ViewController: UIViewController {
         print("Your collection contains \(photoAssets) photos.")
         
         print(photoAssets, collection)
-        
+        print(photoAssets.count)
+        var count = 0
         photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
             let options = PHImageRequestOptions()
             options.deliveryMode = .highQualityFormat
@@ -257,7 +260,8 @@ class ViewController: UIViewController {
                                 let count = arr.count
                                 let fileName = "\(arr[count-1])"
                                 print(fileName)
-                                self.processImage(fromImage: image, image_name: fileName, image_properties: image_properties)
+                                self.processImage(fromImage: image, image_id: "\(count)", image_name: fileName, image_properties: image_properties)
+                                ImageArray.count += 1
                             }
                         }
                     }
@@ -391,7 +395,7 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
 //                print("height \(value.size.height)")
                 print(value)
                 if (value.imageOrientation == UIImageOrientation.up){print("inside MAP orientation is UP")}
-                self.processImage(fromImage: value)
+//                self.processImage(fromImage: value)
             }
         }
     }
