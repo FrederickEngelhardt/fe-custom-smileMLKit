@@ -238,7 +238,9 @@ class ViewController: UIViewController {
     func grabPhotos(){
         
         let fetchOptions = PHFetchOptions()
-        fetchOptions.predicate = NSPredicate(format: "title = %@", "Test")
+        // SampleSet for folder of 50 images
+        // Test for folder of 2 images.
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "SampleSet")
         let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .albumRegular, options: fetchOptions)
         print("Your collection has been found")
         
