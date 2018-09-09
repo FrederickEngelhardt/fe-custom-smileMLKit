@@ -175,7 +175,7 @@ class ViewController: UIViewController {
                     ]
                 ]
                 var dataDictionary = JsonFunctions.DataStack()
-                dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
+                dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "labels", data: data)
                 
                 
                 return
@@ -198,7 +198,7 @@ class ViewController: UIViewController {
                     ]
             ]
             var dataDictionary = JsonFunctions.DataStack()
-            dataDictionary.evaluate(image_id: image_id, type: "labels", data: data)
+            dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "labels", data: data)
             print("THIS IS COUNT", ImageArray.count, image_id)
             if ("\(ImageArray.folderMaxCount)" == image_id){
 //                print(JsonFunctions.AllImages.data)
@@ -210,7 +210,7 @@ class ViewController: UIViewController {
     
     // Main function that calls all MLKit detections
     func processImage(fromImage image: UIImage, image_id: String, image_name: String? = nil, image_properties: [String: String]? = nil) {
-//        self.detect(fromImage: image, image_id: image_id, image_name: image_name!, image_properties: image_properties!)
+        self.detect(fromImage: image, image_id: image_id, image_name: image_name!, image_properties: image_properties!)
         self.faceDetection(fromImage: image, image_id, image_name!, image_properties!)
     }
     
@@ -220,7 +220,7 @@ class ViewController: UIViewController {
         let nsUserDomainMask    = FileManager.SearchPathDomainMask.userDomainMask
         let paths               = NSSearchPathForDirectoriesInDomains(nsDocumentDirectory, nsUserDomainMask, true)
         var theItems = [String]()
-        if let dirPath          = paths.first
+        if let dirPath = paths.first
         {
             let imageURL = URL(fileURLWithPath: dirPath).appendingPathComponent(folderName)
             
@@ -340,8 +340,6 @@ class ViewController: UIViewController {
         }
         // If no values returned add a error message
         if (stateJSON.count == 0){stateJSON.append(["Error?": "No Faces Detected"])}
-//        dump(stateJSON)
-         print("This is the console output: \(stateJSON as AnyObject)")
         
         // This were we update the global JSON object
         let data: [String: [String: Any]] = [
@@ -352,8 +350,9 @@ class ViewController: UIViewController {
                 "image_properties": image_properties
             ]
         ]
+        print("FACEIMAGE JSON DATA to send: \(data as AnyObject)")
         var dataDictionary = JsonFunctions.DataStack()
-        dataDictionary.evaluate(image_id: image_id, type: "face", data: data)
+        dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "face", data: data)
         print("THIS IS CURRENT FACE INDEX", JsonFunctions.AllImages.faceIndex)
         if (ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
             //                print(JsonFunctions.AllImages.data)

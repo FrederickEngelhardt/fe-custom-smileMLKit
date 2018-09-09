@@ -68,14 +68,14 @@ struct JsonFunctions {
         
         
         // Evaluate will grab the data and either create a new imageData dictionary or patch the existing dictionary.
-        mutating func evaluate(image_id: String, type: String, data: [String: [String: Any]]){
+        mutating func evaluate(image_id: String, image_name: String, type: String, data: [String: [String: Any]]){
             let length: Int = AllImages.data.count
             switch(type){
             case "face":
                 print("You receieved faceData")
                 if (AllImages.faceIndex < length){
                     AllImages.faceIndex += 1
-                    self.patch(image_id, type, data)
+                    self.patch(image_id, image_name, type, data)
                 }
                 else {
                     AllImages.faceIndex += 1
@@ -85,7 +85,7 @@ struct JsonFunctions {
                 print("You receieved labelData")
                 if (AllImages.labelIndex < length){
                     AllImages.labelIndex += 1
-                    self.patch(image_id, type, data)
+                    self.patch(image_id, image_name, type, data)
                 }
                 else {
                     AllImages.labelIndex += 1
@@ -95,29 +95,27 @@ struct JsonFunctions {
                 print("You have failed to provide a type for this data")
             }
         }
-        mutating func patch(_ image_id: String, _ type: String, _ element: [String: [String: Any]]) -> [String: [String: Any]] {
+        mutating func patch(_ image_id: String,_ image_name: String, _ type: String, _ element: [String: [String: Any]]) {
             switch(type){
             case "face":
                 print("Patching face data")    
-                if let data = element[image_id]!["face_data"] as? [String: [String: Any]] {
-                    AllImages.data[image_id]!["face_data"] = data
+                if let data = element as? [String: [String: Any]] {
+                    AllImages.data[image_id]![image_name]!["face_data"] = data[image_name]!["face_data"]!
                 }
                 break
             case "labels":
                 print("Patching lables data")
-                if let data = element[image_id]!["image_tags"] as? [String: [String: Any]] {
-                    AllImages.data[image_id]!["image_tags"] = data
+                if let data = element[image_id]! as? [String: [String: Any]] {
+                    AllImages.data[image_id]!["label_data"] = data
                 }
                 break
             default:
                 print("Type was not properly sent to push")
             }
-            return AllImages.data
         }
-        mutating func push(_ id: String,_ type: String, _ imageData: [String: [String: Any]]) -> [String: [String: Any]] {
+        mutating func push(_ id: String,_ type: String, _ imageData: [String: [String: Any]]){
             print("You just added a image onto the allImages Array")
             AllImages.data[id] = imageData
-            return AllImages.data
         }
     }
     
