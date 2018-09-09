@@ -184,7 +184,7 @@ class ViewController: UIViewController {
             
             ImageArray.labelsResults = labels.reduce("") { $0 + "\($1.label) (\($1.confidence)) \(elapsed) \n" }
 //            let data = LabelData(score: (labels.reduce("") { $0 + "\($1.label) (\($1.confidence))\n" }), timing: 21)
-            
+            print(labels)
             let myLabels = labels.reduce("") { $0 + "\($1.label) (\($1.confidence))" }
             let labelData = labels.map {ele in
                 return ["name": ele.label, "confidence": ele.confidence]
@@ -200,7 +200,7 @@ class ViewController: UIViewController {
             var dataDictionary = JsonFunctions.DataStack()
             dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "labels", data: data)
             print("THIS IS COUNT", ImageArray.count, image_id)
-            if ("\(ImageArray.folderMaxCount)" == image_id){
+            if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex && ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
 //                print(JsonFunctions.AllImages.data)
                 print("This is the console output: \(JsonFunctions.AllImages.data as AnyObject)")
             }
@@ -315,7 +315,10 @@ class ViewController: UIViewController {
             var lEConfidence = CGFloat()
             var rightEyeOpen = false
             var rEConfidence = CGFloat()
+            var frame = CGRect()
             if face.hasSmilingProbability {
+                // set the frame inside here too...
+                frame = face.frame
                 isSmiling = self.isPositive(forProbability: face.smilingProbability)
                 iSConfidence = face.smilingProbability
             }
@@ -330,6 +333,7 @@ class ViewController: UIViewController {
                 lEConfidence = face.leftEyeOpenProbability
             }
             let faceStateJSON: [String: [String: String]] = [
+                "box": ["x": "\(frame.minX)", "y": "\(frame.minY)", "width": "\(frame.width)", "height": "\(frame.height)" ],
                 "is_smiling": ["value": "\(isSmiling)", "confidence": "\(iSConfidence)"],
                 "left_eye_open": ["value": "\(leftEyeOpen)", "confidence": "\(lEConfidence)"],
                 "right_eye_open": ["value": "\(rightEyeOpen)", "confidence": "\(rEConfidence)"]
@@ -356,9 +360,10 @@ class ViewController: UIViewController {
         var dataDictionary = JsonFunctions.DataStack()
         dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "face", data: data)
         print("THIS IS CURRENT FACE INDEX", JsonFunctions.AllImages.faceIndex)
-        if (ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
+        if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex && ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
             //                print(JsonFunctions.AllImages.data)
             print("ALLIMAGES JSON DATA: \(JsonFunctions.AllImages.data as AnyObject)")
+            print("ALLIMAGES RAW DATA: \(JsonFunctions.AllImages.data)")
         }
         self.detectedInfo.text = ImageArray.labelsResults
         return states
