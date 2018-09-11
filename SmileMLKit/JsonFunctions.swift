@@ -65,7 +65,11 @@ struct JsonFunctions {
             "face_data": "",
             "image_tags": ""
         ]
-        
+        public func formatJSON(){
+            let jsonData = try! JSONSerialization.data(withJSONObject: JsonFunctions.AllImages.data)
+            let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)
+            print("This is your JSON OBJECT", jsonString!, "End of JSON OBJECT")
+        }
         
         // Evaluate will grab the data and either create a new imageData dictionary or patch the existing dictionary.
         mutating func evaluate(image_id: String, image_name: String, type: String, data: [String: [String: Any]]){
