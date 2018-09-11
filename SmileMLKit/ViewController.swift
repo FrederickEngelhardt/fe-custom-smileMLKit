@@ -202,7 +202,11 @@ class ViewController: UIViewController {
             print("THIS IS COUNT", ImageArray.count, image_id)
             if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex && ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
 //                print(JsonFunctions.AllImages.data)
-                print("This is the console output: \(JsonFunctions.AllImages.data as AnyObject)")
+                
+                let jsonData = try! JSONSerialization.data(withJSONObject: JsonFunctions.AllImages.data)
+                let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)
+                print(jsonString!)
+//                print("This is the console output: \(JsonFunctions.AllImages.data as AnyObject)")
             }
             self.detectedInfo.text = ImageArray.labelsResults
         }
@@ -362,8 +366,11 @@ class ViewController: UIViewController {
         print("THIS IS CURRENT FACE INDEX", JsonFunctions.AllImages.faceIndex)
         if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex && ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
             //                print(JsonFunctions.AllImages.data)
-            print("ALLIMAGES JSON DATA: \(JsonFunctions.AllImages.data as AnyObject)")
-            print("ALLIMAGES RAW DATA: \(JsonFunctions.AllImages.data)")
+            let jsonData = try! JSONSerialization.data(withJSONObject: JsonFunctions.AllImages.data)
+            let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)
+            print(jsonString!)
+//            print("ALLIMAGES JSON DATA: \(JsonFunctions.AllImages.data as AnyObject)")
+//            print("ALLIMAGES RAW DATA: \(JsonFunctions.AllImages.data)")
         }
         self.detectedInfo.text = ImageArray.labelsResults
         return states

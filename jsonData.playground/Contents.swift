@@ -112,6 +112,12 @@ struct DataStack {
     mutating func push(_ id: String,_ type: String, _ imageData: [String: [String: Any]]) -> [String: [String: Any]] {
         print("You just added a image onto the allImages Array")
         AllImages.data[id] = imageData
+        
+        // Important data transformation to actual JSON format
+        let jsonData = try! JSONSerialization.data(withJSONObject: AllImages.data)
+        let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)
+        print(jsonString!)
+
         return AllImages.data
     }
 }
@@ -169,4 +175,9 @@ dataDictionary.evaluate(image_id: "image01", type: "labels", data: imageTagData)
 dataDictionary.evaluate(image_id: "image02", type: "labels", data: imageTagData2)
 dataDictionary.evaluate(image_id: "image01", type: "face", data: faceData)
 //print(AllImages.data)
+
+//let jsonData = try! JSONSerialization.data(withJSONObject: messageDictionary)
+//let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)
+
+
 
