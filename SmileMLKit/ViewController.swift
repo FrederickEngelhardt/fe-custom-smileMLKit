@@ -165,12 +165,11 @@ class ViewController: UIViewController {
             guard error == nil, let labels = labels, !labels.isEmpty else {
                 // Error.
                 self.detectedInfo.text = "No idea"
-                let labelError = ["ERROR": "NO RESULTS FOUND FOR THIS IMAGE"]
                 let data: [String: [String: Any]] = [
                     image_name: [
                         "image_id": image_id,
                         "image_name": image_name,
-                        "image_tags": labelError,
+                        "image_tags": [],
                         "image_properties": image_properties
                     ]
                 ]
@@ -348,8 +347,7 @@ class ViewController: UIViewController {
             states.append(faceState)
             stateJSON.append(faceStateJSON)
         }
-        // If no values returned add a error message
-        if (stateJSON.count == 0){stateJSON.append(["Error?": "No Faces Detected"])}
+        // If no values the array will be blank
         
         // This were we update the global JSON object
         let data: [String: [String: Any]] = [
