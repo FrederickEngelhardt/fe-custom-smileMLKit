@@ -34,11 +34,11 @@ class LabelData {
 }
 
 class ViewController: UIViewController {
-    let threshold: CGFloat = 0.75
+    let threshold: CGFloat = 0.7
     lazy var faceDetector = Vision.vision().faceDetector(options: faceDetectionOptions())
     lazy var vision = Vision.vision()
     var labelDetector: VisionLabelDetector!
-    static let labelConfidenceThreshold : Float = 0.9
+    static let labelConfidenceThreshold : Float = 0.7
     let options = VisionLabelDetectorOptions(
         confidenceThreshold: labelConfidenceThreshold
     )
