@@ -199,7 +199,9 @@ class ViewController: UIViewController {
             var dataDictionary = JsonFunctions.DataStack()
             dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "labels", data: data)
             print("THIS IS COUNT", ImageArray.count, image_id)
-            dataDictionary.formatJSON()
+            if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex){
+                dataDictionary.formatJSON()
+            }
             if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex && ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
                 // print out the JSON
                 dataDictionary.formatJSON()

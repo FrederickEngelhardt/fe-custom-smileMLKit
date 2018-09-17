@@ -69,6 +69,7 @@ struct JsonFunctions {
             let jsonData = try! JSONSerialization.data(withJSONObject: JsonFunctions.AllImages.data)
             let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue)
             print("This is your JSON OBJECT", jsonString!, "End of JSON OBJECT")
+            print("This is jsonstring turned into ANY OBJECT \(jsonData as AnyObject)")
             //            print("ALLIMAGES JSON DATA: \(JsonFunctions.AllImages.data as AnyObject)")
             //            print("ALLIMAGES RAW DATA: \(JsonFunctions.AllImages.data)")
         }
