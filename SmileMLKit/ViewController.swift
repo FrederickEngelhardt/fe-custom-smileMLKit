@@ -294,6 +294,7 @@ class ViewController: UIViewController {
             "910106635_1000_1939868437.jpg",
             "910106635_1000_1939914076.jpg",
         ]
+        ImageArray.folderMaxCount = albumArray.count
         albumArray.forEach { (albumStringName) in
             
             fetchOptions.predicate = NSPredicate(format: "title = %@", "\(albumStringName)")
@@ -303,7 +304,7 @@ class ViewController: UIViewController {
             let photoAssets = PHAsset.fetchAssets(in: collection.firstObject!, options: nil)
             print("Your collection contains \(photoAssets) photos.")
             
-            ImageArray.folderMaxCount = photoAssets.count
+//            ImageArray.folderMaxCount = photoAssets.count
             print("You are processing: \(ImageArray.folderMaxCount) Images")
             photoAssets.enumerateObjects { (asset: PHAsset!, count: Int, stop: UnsafeMutablePointer) in
                 let options = PHImageRequestOptions()
