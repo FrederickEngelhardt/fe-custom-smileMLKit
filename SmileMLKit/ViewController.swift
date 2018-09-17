@@ -199,9 +199,9 @@ class ViewController: UIViewController {
             var dataDictionary = JsonFunctions.DataStack()
             dataDictionary.evaluate(image_id: image_id, image_name: image_name, type: "labels", data: data)
             print("THIS IS COUNT", ImageArray.count, image_id)
-            if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex){
-                dataDictionary.formatJSON()
-            }
+//            if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex){
+//                dataDictionary.formatJSON()
+//            }
             if (ImageArray.folderMaxCount == JsonFunctions.AllImages.labelIndex && ImageArray.folderMaxCount == JsonFunctions.AllImages.faceIndex){
                 // print out the JSON
                 dataDictionary.formatJSON()
@@ -213,7 +213,7 @@ class ViewController: UIViewController {
     // Main function that calls all MLKit detections
     func processImage(fromImage image: UIImage, image_id: String, image_name: String? = nil, image_properties: [String: String]? = nil) {
         self.detect(fromImage: image, image_id: image_id, image_name: image_name!, image_properties: image_properties!)
-//        self.faceDetection(fromImage: image, image_id, image_name!, image_properties!)
+        self.faceDetection(fromImage: image, image_id, image_name!, image_properties!)
     }
     
     func loadImagesFromAlbum(folderName:String) -> [String]{
@@ -235,9 +235,6 @@ class ViewController: UIViewController {
             }
         }
         return theItems
-    }
-    func complete(){
-        print("complete")
     }
     func grabPhotos(){
         
